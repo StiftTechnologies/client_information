@@ -100,8 +100,7 @@ class ClientInformationWeb {
   }
 
   String _getDeviceId() {
-    var deviceIdKey = _initialDeviceIdKey();
-    var key = '${ClientInformationWeb._deviceIdKeyPlaceHolder}_$deviceIdKey';
+    var key = '${ClientInformationWeb._deviceIdKeyPlaceHolder}';
     var deviceId = _getCookieValue(key);
 
     if (deviceId != null) {
@@ -113,26 +112,8 @@ class ClientInformationWeb {
     }
   }
 
-  String _initialDeviceIdKey() {
-    var deviceIdKey = _getDeviceIdKey();
-    if (deviceIdKey == null) _setDeviceIdKey();
-    deviceIdKey = _getDeviceIdKey();
-    return deviceIdKey!;
-  }
-
-  void _setDeviceIdKey() {
-    var timestamp = DateTime.now().millisecondsSinceEpoch;
-    var deviceId = Uuid().v4();
-    _setCookie(
-        '${ClientInformationWeb._deviceIdKeyPlaceHolder}_$timestamp', deviceId);
-  }
-
-  String? _getDeviceIdKey() =>
-      _getCookieValue(ClientInformationWeb._deviceIdKeyPlaceHolder,
-          similar: true);
-
   void _setCookie(String key, String value) {
-    html.window.document.cookie = '$key=$value; max-age=31536000; path=/';
+    html.window.document.cookie = '$key=$value; max-age=34560000; path=/';
   }
 
   String? _getCookieValue(String key, {bool similar = false}) {
