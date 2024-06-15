@@ -122,8 +122,9 @@ class ClientInformationWeb {
 
   void _setDeviceIdKey() {
     var timestamp = DateTime.now().millisecondsSinceEpoch;
-    _setCookie('${ClientInformationWeb._deviceIdKeyPlaceHolder}_$timestamp',
-        timestamp.toString());
+    var deviceId = Uuid().v4();
+    _setCookie(
+        '${ClientInformationWeb._deviceIdKeyPlaceHolder}_$timestamp', deviceId);
   }
 
   String? _getDeviceIdKey() =>
