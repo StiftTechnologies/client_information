@@ -1,3 +1,9 @@
+## 2.4.5
+
+- fix(web): ensure cookie max-age is set to 1 year
+- refactor(web): use uuids for device id instead of timestamp
+- chore: upgrade packages
+
 ## 2.1.4
 
 - chore: upgrade package `uuid`'s version
