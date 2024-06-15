@@ -131,7 +131,7 @@ class ClientInformationWeb {
           similar: true);
 
   void _setCookie(String key, String value) {
-    html.window.document.cookie = '$key=$value';
+    html.window.document.cookie = '$key=$value; max-age=31536000; path=/';
   }
 
   String? _getCookieValue(String key, {bool similar = false}) {
