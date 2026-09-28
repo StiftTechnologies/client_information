@@ -99,25 +99,44 @@ class ClientInformationWeb {
     }
   }
 
-  String _getDeviceId() {
-    var deviceIdKey = _initialDeviceIdKey();
-    var key = '${ClientInformationWeb._deviceIdKeyPlaceHolder}_$deviceIdKey';
-    var deviceId = _getCookieValue(key);
+  static String? _memoryDeviceId;
 
-    if (deviceId != null) {
+  // Cookie writes are silently dropped in some contexts (e.g. Safari in a
+  // cross-site iframe), so fall back to localStorage, then to memory.
+  String _getDeviceId() {
+    final fromCookie = _getCookieDeviceId();
+    if (fromCookie != null) return fromCookie;
+
+    final storageKey = ClientInformationWeb._deviceIdKeyPlaceHolder;
+    try {
+      final stored = html.window.localStorage[storageKey];
+      if (stored != null && stored.isNotEmpty) return stored;
+      final deviceId = Uuid().v4();
+      html.window.localStorage[storageKey] = deviceId;
       return deviceId;
-    } else {
-      deviceId = Uuid().v4();
-      _setCookie(key, deviceId);
-      return deviceId;
+    } catch (_) {
+      return _memoryDeviceId ??= Uuid().v4();
     }
   }
 
-  String _initialDeviceIdKey() {
-    var deviceIdKey = _getDeviceIdKey();
-    if (deviceIdKey == null) _setDeviceIdKey();
-    deviceIdKey = _getDeviceIdKey();
-    return deviceIdKey!;
+  String? _getCookieDeviceId() {
+    try {
+      var deviceIdKey = _getDeviceIdKey();
+      if (deviceIdKey == null) {
+        _setDeviceIdKey();
+        deviceIdKey = _getDeviceIdKey();
+        if (deviceIdKey == null) return null;
+      }
+      var key = '${ClientInformationWeb._deviceIdKeyPlaceHolder}_$deviceIdKey';
+      var deviceId = _getCookieValue(key);
+      if (deviceId != null) return deviceId;
+
+      deviceId = Uuid().v4();
+      _setCookie(key, deviceId);
+      return _getCookieValue(key);
+    } catch (_) {
+      return null;
+    }
   }
 
   void _setDeviceIdKey() {
