@@ -99,17 +99,33 @@ class ClientInformationWeb {
     }
   }
 
+  static String? _memoryDeviceId;
+
+  // Cookie writes are silently dropped in some contexts (e.g. Safari in a
+  // cross-site iframe), so fall back to localStorage, then to memory.
   String _getDeviceId() {
     var key = '${ClientInformationWeb._deviceIdKeyPlaceHolder}';
     var deviceId = _getCookieValue(key);
+    if (deviceId != null) return deviceId;
 
-    if (deviceId != null) {
-      return deviceId;
-    } else {
-      deviceId = Uuid().v4();
-      _setCookie(key, deviceId);
-      return deviceId;
+    try {
+      final stored = html.window.localStorage[key];
+      if (stored != null && stored.isNotEmpty) {
+        _setCookie(key, stored);
+        return stored;
+      }
+    } catch (_) {}
+
+    deviceId = _memoryDeviceId ?? Uuid().v4();
+    _setCookie(key, deviceId);
+    if (_getCookieValue(key) == deviceId) return deviceId;
+
+    try {
+      html.window.localStorage[key] = deviceId;
+    } catch (_) {
+      _memoryDeviceId = deviceId;
     }
+    return deviceId;
   }
 
   void _setCookie(String key, String value) {
